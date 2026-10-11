@@ -1,0 +1,16 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+# Python
+.venv/
+__pycache__/
+*.pyc
+# Rapports générés : jamais versionnés
+reports/*
+!reports/.gitkeep
+# Divers
+.env
+*.pem
