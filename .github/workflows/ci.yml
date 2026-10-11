@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Clés d'accès AWS et fichiers sensibles
         run: |
-          if grep -rEn --exclude-dir=.git "AKIA[0-9A-Z]{16}|aws_secret_access_key" .; then
+          if grep -rEn --exclude-dir=.git "AKIA[0-9A-Z]{16}|aws_secret_access_ke[y]" .; then
             echo "Secret détecté"; exit 1
           fi
           if git ls-files | grep -E "(^|/)(backend\.hcl|.*\.tfstate.*|.*\.pem)$"; then
