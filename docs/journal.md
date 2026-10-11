@@ -25,3 +25,8 @@ d'un document non autorisé pour drift-reader (US-5).
 
 - `scripts/up.sh` : init puis apply ; `scripts/down.sh` : destroy puis audit ; `scripts/audit.sh` : cherche les restes par tag Project=driftguard (EC2, Security Groups, S3) et par nom (rôle et profil IAM).
 - Le futur bucket de state aura un tag différent (Project=driftguard-state) pour rester hors du cycle de destruction (ADR-004).
+
+## Sprint 1 : bucket de state dédié (ADR-004)
+
+- `bootstrap/` : crée un bucket S3 dédié (versioning, chiffrement, accès public bloqué, `prevent_destroy`), tag `Project=driftguard-state` pour rester hors de l'audit et de `down.sh`.
+- `terraform/versions.tf` : backend S3 avec `use_lockfile`, paramètres lus dans `backend.hcl` (non versionné, contient l'identifiant de compte ; modèle dans `backend.hcl.example`).

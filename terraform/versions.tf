@@ -3,13 +3,10 @@ terraform {
   required_providers {
     aws = { source = "hashicorp/aws" }
   }
-  # Backend S3 : à activer après création du bucket de state (ADR-004)
-  # backend "s3" {
-  #   bucket       = "<bucket-state-driftguard>"
-  #   key          = "driftguard/terraform.tfstate"
-  #   region       = "eu-north-1"
-  #   use_lockfile = true
-  # }
+
+  # Paramètres du backend dans backend.hcl (non versionné, car il contient
+  # l'identifiant de compte). Voir backend.hcl.example.
+  backend "s3" {}
 }
 
 provider "aws" {

@@ -1,0 +1,4 @@
+bucket       = "driftguard-tfstate-<IDENTIFIANT_DE_COMPTE>"
+key          = "driftguard/terraform.tfstate"
+region       = "eu-north-1"
+use_lockfile = true
