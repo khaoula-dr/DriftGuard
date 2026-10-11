@@ -30,3 +30,10 @@ d'un document non autorisé pour drift-reader (US-5).
 
 - `bootstrap/` : crée un bucket S3 dédié (versioning, chiffrement, accès public bloqué, `prevent_destroy`), tag `Project=driftguard-state` pour rester hors de l'audit et de `down.sh`.
 - `terraform/versions.tf` : backend S3 avec `use_lockfile`, paramètres lus dans `backend.hcl` (non versionné, contient l'identifiant de compte ; modèle dans `backend.hcl.example`).
+
+## Sprint 1 : US-5, identités IAM séparées
+
+- `terraform/iam.tf` : `drift-reader` (lecture, CloudTrail, state sans verrou, SendCommand limité à un seul document SSM et aux instances taguées du projet) et `drift-fixer` (CreateTags et PutBucketTagging seulement, sur les ressources du projet et les clés de tags gérées).
+- `scripts/test_iam.sh` : 4 tests négatifs obligatoires (+1 bonus) et tests positifs. Les actions destructrices sont testées en `--dry-run` : AWS évalue les droits sans rien exécuter.
+- Limite documentée : les tests prouvent les permissions effectives dans les conditions testées, pas l'absence de tout risque.
+- `scripts/audit.sh` étendu aux rôles `drift-reader`, `drift-fixer` et au document `driftguard-check`.

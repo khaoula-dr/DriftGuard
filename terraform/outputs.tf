@@ -9,3 +9,11 @@ output "security_group_id" {
 output "app_bucket" {
   value = aws_s3_bucket.app.bucket
 }
+
+output "reader_role_arn" {
+  value = aws_iam_role.reader.arn
+}
+
+output "fixer_role_arn" {
+  value = aws_iam_role.fixer.arn
+}
