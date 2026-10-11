@@ -20,3 +20,8 @@ d'un document non autorisé pour drift-reader (US-5).
 - Fichiers : `terraform/variables.tf`, `main.tf`, `outputs.tf`.
 - Contenu : EC2 t3.micro (Amazon Linux 2023, Nginx, IMDSv2 obligatoire, disque chiffré), rôle SSM, Security Group sans règle entrante, bucket S3 privé, tags de référence (Project, Environment, ManagedBy).
 - Choix : state local pour l'instant, migration vers le bucket dédié prévue (ADR-004).
+
+## Sprint 1 : US-3, scripts up et down
+
+- `scripts/up.sh` : init puis apply ; `scripts/down.sh` : destroy puis audit ; `scripts/audit.sh` : cherche les restes par tag Project=driftguard (EC2, Security Groups, S3) et par nom (rôle et profil IAM).
+- Le futur bucket de state aura un tag différent (Project=driftguard-state) pour rester hors du cycle de destruction (ADR-004).

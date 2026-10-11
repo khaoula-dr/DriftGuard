@@ -14,3 +14,7 @@ reports/*
 # Divers
 .env
 *.pem
+
+# Vidéos : trop lourdes pour Git
+docs/media/*.mp4
+docs/media/*.mov
