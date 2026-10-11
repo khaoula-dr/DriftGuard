@@ -14,3 +14,9 @@
 
 À tester plus tard : exécution d'un document SSM personnalisé (US-8) et refus
 d'un document non autorisé pour drift-reader (US-5).
+
+## Sprint 1 : US-1 et US-2, socle Terraform
+
+- Fichiers : `terraform/variables.tf`, `main.tf`, `outputs.tf`.
+- Contenu : EC2 t3.micro (Amazon Linux 2023, Nginx, IMDSv2 obligatoire, disque chiffré), rôle SSM, Security Group sans règle entrante, bucket S3 privé, tags de référence (Project, Environment, ManagedBy).
+- Choix : state local pour l'instant, migration vers le bucket dédié prévue (ADR-004).
