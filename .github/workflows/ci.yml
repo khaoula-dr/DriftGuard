@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Aucun accès AWS : lecture du dépôt uniquement (ADR-001)
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform (fmt et validate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.10"
+      - name: Format
+        run: terraform fmt -check -recursive
+      - name: Validate (projet principal)
+        run: |
+          terraform -chdir=terraform init -backend=false -input=false
+          terraform -chdir=terraform validate
+      - name: Validate (bootstrap)
+        run: |
+          terraform -chdir=bootstrap init -backend=false -input=false
+          terraform -chdir=bootstrap validate
+
+  ansible:
+    name: Ansible (lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-lint
+      - run: ansible-lint ansible/playbook.yml
+
+  python:
+    name: Tests unitaires et garde-fous IAM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
+  secrets:
+    name: Aucun secret versionné
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clés d'accès AWS et fichiers sensibles
+        run: |
+          if grep -rEn --exclude-dir=.git "AKIA[0-9A-Z]{16}|aws_secret_access_ke[y]" .; then
+            echo "Secret détecté"; exit 1
+          fi
+          if git ls-files | grep -E "(^|/)(backend\.hcl|.*\.tfstate.*|.*\.pem)$"; then
+            echo "Fichier sensible versionné"; exit 1
+          fi
+          echo "OK : aucun secret détecté"

@@ -51,3 +51,15 @@ d'un document non autorisé pour drift-reader (US-5).
 - **Précision sur la section 4.2 du cahier des charges** : `resource_changes` contient aussi l'action qui ramène la ressource au code. Une dérive se reconnaît à sa présence dans `resource_drift` ; un changement de code non appliqué est une action de `resource_changes` sans dérive correspondante.
 - **CloudTrail** : `lookup-events` remonte aussi les tentatives refusées et les `--dry-run` des tests IAM (sessions `test-drift-reader`, `test-drift-fixer`). L'attribution (US-10) devra lire `CloudTrailEvent` : ignorer les événements avec `errorCode`, comparer clé et valeur du tag, et borner la fenêtre de temps.
 - Le script `drift.py check` assume `drift-reader` (jamais l'identité opérateur), vérifie le commit Git, écrit un rapport JSON dans `reports/` (non versionné) et masque `user_data`.
+
+## Résultat US-5 (2026-10-11)
+
+- Tests négatifs : 4 sur 4 refusés par AWS (+1 bonus : tag hors des clés gérées).
+- Tests positifs : 7 sur 7 réussis.
+- Le test P7 (`terraform plan` en lecture seule avec drift-reader) a d'abord échoué : permission `ssm:DescribeDocumentPermission` manquante. Ajoutée en lecture seule, sans élargir les droits d'écriture.
+
+## Sprint 1 : US-4, CI GitHub
+
+- `.github/workflows/ci.yml` : 4 jobs sans accès AWS (Terraform fmt et validate, ansible-lint, tests Python, détection de secrets).
+- `tests/test_garde_fous_iam.py` : garde-fous statiques qui échouent si les droits de drift-reader ou drift-fixer sont élargis par erreur.
+- `ansible/playbook.yml` : playbook minimal, étendu en US-8 et US-15.

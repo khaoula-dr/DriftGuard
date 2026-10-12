@@ -12,3 +12,6 @@ Avant publication : masquer l'identifiant de compte AWS (12 chiffres), les ARN e
 | Sprint 2 | Plan Terraform montrant "Environment" = "prod" -> "lab" (cadrer sans les lignes du compte) | 08-plan-derive.png | |
 | US-6 | Sortie de drift.py check avec la dérive détectée | 09-drift-check.png | |
 | US-6 | Extrait du rapport : jq '.drifts' reports/<fichier>.json | 10-rapport-json.png | |
+| US-5 | Écran complet de scripts/test_iam.sh, tout en PASS | 05-tests-iam.png | |
+| US-5 | Politique JSON de drift-fixer dans la console IAM (flouter le compte) | 06-politique-fixer.png | |
+| US-4 | CI verte sur GitHub (pull request, 4 jobs) | 07-ci-verte.png | |
