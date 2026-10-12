@@ -37,3 +37,17 @@ d'un document non autorisé pour drift-reader (US-5).
 - `scripts/test_iam.sh` : 4 tests négatifs obligatoires (+1 bonus) et tests positifs. Les actions destructrices sont testées en `--dry-run` : AWS évalue les droits sans rien exécuter.
 - Limite documentée : les tests prouvent les permissions effectives dans les conditions testées, pas l'absence de tout risque.
 - `scripts/audit.sh` étendu aux rôles `drift-reader`, `drift-fixer` et au document `driftguard-check`.
+## Bilan du Sprint 1
+
+- **Livré** : 15 points sur 15 (US-1 à US-5), plus le bucket de state dédié (ADR-004).
+- **Contraintes du compte** : la SCP n'a bloqué aucune des fonctions testées (rôles IAM, S3, SSM, CloudTrail, backend S3). Les stories repoussables (US-9, US-14) restent donc dans le Sprint 2 et 3.
+- **Bon à garder** : tester les permissions avec des `--dry-run`, et écrire des garde-fous qui échouent si les droits d'un rôle sont élargis.
+- **Surprises** : mon premier audit affichait « propre » alors que la session AWS avait expiré, et le contrôle de secrets de la CI se détectait lui-même. Dans les deux cas, un contrôle doit prouver qu'il sait échouer.
+- **Pour le Sprint 2** : les 15 points restent réalistes ; l'identifiant d'acteur CloudTrail est un identifiant Identity Center, à traduire dans le rapport.
+## Sprint 2 : US-6, observations sur le plan Terraform (2026-10-12)
+
+- `resource_drift` est bien renseigné : tag `Environment` passé de `lab` à `prod` sur l'instance, modifié à la main.
+- **Bruit** : `aws_iam_role.reader` apparaît en dérive à cause de l'attribut calculé `inline_policy` du rôle (cause probable : attribut non rafraîchi quand la politique est modifiée par la ressource `aws_iam_role_policy`). Exclu, car la politique reste suivie par `aws_iam_role_policy`. `tags_all` doublonne `tags` : exclu aussi.
+- **Précision sur la section 4.2 du cahier des charges** : `resource_changes` contient aussi l'action qui ramène la ressource au code. Une dérive se reconnaît à sa présence dans `resource_drift` ; un changement de code non appliqué est une action de `resource_changes` sans dérive correspondante.
+- **CloudTrail** : `lookup-events` remonte aussi les tentatives refusées et les `--dry-run` des tests IAM (sessions `test-drift-reader`, `test-drift-fixer`). L'attribution (US-10) devra lire `CloudTrailEvent` : ignorer les événements avec `errorCode`, comparer clé et valeur du tag, et borner la fenêtre de temps.
+- Le script `drift.py check` assume `drift-reader` (jamais l'identité opérateur), vérifie le commit Git, écrit un rapport JSON dans `reports/` (non versionné) et masque `user_data`.

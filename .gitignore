@@ -21,3 +21,8 @@ docs/media/*.mov
 
 # Paramètres du backend (contient l identifiant de compte)
 backend.hcl
+
+# Plans Terraform (peuvent contenir des données sensibles)
+plan.bin
+plan.json
+*.tfplan
