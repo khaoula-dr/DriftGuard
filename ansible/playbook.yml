@@ -1,0 +1,15 @@
+---
+- name: Configuration de référence du serveur web
+  hosts: web
+  become: true
+  tasks:
+    - name: Nginx est installé
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+
+    - name: Nginx est démarré et activé
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true

@@ -37,3 +37,15 @@ d'un document non autorisé pour drift-reader (US-5).
 - `scripts/test_iam.sh` : 4 tests négatifs obligatoires (+1 bonus) et tests positifs. Les actions destructrices sont testées en `--dry-run` : AWS évalue les droits sans rien exécuter.
 - Limite documentée : les tests prouvent les permissions effectives dans les conditions testées, pas l'absence de tout risque.
 - `scripts/audit.sh` étendu aux rôles `drift-reader`, `drift-fixer` et au document `driftguard-check`.
+
+## Résultat US-5 (2026-10-11)
+
+- Tests négatifs : 4 sur 4 refusés par AWS (+1 bonus : tag hors des clés gérées).
+- Tests positifs : 7 sur 7 réussis.
+- Le test P7 (`terraform plan` en lecture seule avec drift-reader) a d'abord échoué : permission `ssm:DescribeDocumentPermission` manquante. Ajoutée en lecture seule, sans élargir les droits d'écriture.
+
+## Sprint 1 : US-4, CI GitHub
+
+- `.github/workflows/ci.yml` : 4 jobs sans accès AWS (Terraform fmt et validate, ansible-lint, tests Python, détection de secrets).
+- `tests/test_garde_fous_iam.py` : garde-fous statiques qui échouent si les droits de drift-reader ou drift-fixer sont élargis par erreur.
+- `ansible/playbook.yml` : playbook minimal, étendu en US-8 et US-15.
