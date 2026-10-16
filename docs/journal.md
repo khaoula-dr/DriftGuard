@@ -63,3 +63,10 @@ d'un document non autorisé pour drift-reader (US-5).
 - `.github/workflows/ci.yml` : 4 jobs sans accès AWS (Terraform fmt et validate, ansible-lint, tests Python, détection de secrets).
 - `tests/test_garde_fous_iam.py` : garde-fous statiques qui échouent si les droits de drift-reader ou drift-fixer sont élargis par erreur.
 - `ansible/playbook.yml` : playbook minimal, étendu en US-8 et US-15.
+
+## Sprint 2 : US-7, règles de classification
+
+- Règles dans `driftguard/rules.py`, tableau lisible dans `docs/rules.md`.
+- Décision : le tag `Project` n'est jamais corrigé automatiquement, car il intervient dans les conditions IAM de `drift-fixer` et de `drift-reader` (SendCommand). Conséquence cohérente : si `Project` est modifié, `drift-fixer` perd de toute façon le droit de taguer la ressource.
+- Les actions de suppression ou de remplacement proposées par le plan produisent des alertes, jamais une correction.
+- Observation : un `up.sh` a remplacé l'instance EC2 (1 ajoutée, 1 détruite), cause probable : la source de données AMI « dernière version » a changé. Un tel remplacement est exactement ce que la classe « Risque élevé » doit signaler.

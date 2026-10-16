@@ -15,3 +15,4 @@ Avant publication : masquer l'identifiant de compte AWS (12 chiffres), les ARN e
 | US-5 | Écran complet de scripts/test_iam.sh, tout en PASS | 05-tests-iam.png | |
 | US-5 | Politique JSON de drift-fixer dans la console IAM (flouter le compte) | 06-politique-fixer.png | |
 | US-4 | CI verte sur GitHub (pull request, 4 jobs) | 07-ci-verte.png | |
+| US-7 | Sortie de drift.py check avec classe, risque et action (ex. Métadonnées / faible / auto_fix) | 11-classification.png | |

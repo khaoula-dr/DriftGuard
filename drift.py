@@ -3,7 +3,7 @@
 
 Usage : python3 drift.py check
 Aucune écriture sur les ressources métier. Codes de sortie :
-0 = aucune dérive, 2 = dérive détectée, 1 = erreur (rapport d'erreur écrit).
+0 = rien à signaler, 2 = dérive ou alerte, 1 = erreur (rapport d'erreur écrit).
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from driftguard.plan_parser import extract_code_changes, extract_drifts
+from driftguard.rules import CLASS_LABELS, classify, classify_plan_changes
 
 REGION = "eu-north-1"  # ADR-002
 ROOT = Path(__file__).resolve().parent
@@ -98,6 +99,10 @@ def _fmt(value) -> str:
     return text if len(text) <= 80 else text[:77] + "..."
 
 
+def _tag(item: dict) -> str:
+    return f"[{CLASS_LABELS[item['class']]} | risque {item['risk']} | {item['action']}]"
+
+
 def cmd_check(args) -> int:
     report = {
         "analysis_id": str(uuid.uuid4()),
@@ -110,6 +115,7 @@ def cmd_check(args) -> int:
         "status": "error",
         "drifts": [],
         "code_changes": [],
+        "alerts": [],
         "errors": [],
     }
     try:
@@ -125,12 +131,15 @@ def cmd_check(args) -> int:
 
     report["terraform_exit_code"] = code
     report["classification_definitive"] = report["git"]["clean"]
-    report["drifts"] = extract_drifts(plan)
+    report["drifts"] = [{**d, **classify(d)} for d in extract_drifts(plan)]
     report["code_changes"] = extract_code_changes(plan, {d["resource"] for d in report["drifts"]})
-    report["status"] = "drift_detected" if report["drifts"] else "clean"
+    report["alerts"] = classify_plan_changes(report["code_changes"])
+    report["status"] = ("drift_detected" if report["drifts"]
+                        else "alert" if report["alerts"] else "clean")
     path = _write_report(report)
 
-    print(f"Identité : {report['aws_identity'].split('/')[-2]}/{report['aws_identity'].split('/')[-1]}")
+    identity = report["aws_identity"].split("/")
+    print(f"Identité : {identity[-2]}/{identity[-1]}")
     print(f"Commit de référence : {report['git']['commit'][:8]}")
     if not report["git"]["clean"]:
         print("ATTENTION : modifications non validées dans le dépôt, classification non définitive.")
@@ -138,15 +147,18 @@ def cmd_check(args) -> int:
         print("Aucune dérive détectée.")
     for drift in report["drifts"]:
         if drift["kind"] == "deleted":
-            print(f"- {drift['resource']} : {drift['observed']}")
+            print(f"- {drift['resource']} : {drift['observed']}  {_tag(drift)}")
         else:
             print(f"~ {drift['resource']}  {drift['attribute']} : "
-                  f"{_fmt(drift['expected'])} -> {_fmt(drift['observed'])}")
-    pending = [c for c in report["code_changes"] if not c["explained_by_drift"]]
+                  f"{_fmt(drift['expected'])} -> {_fmt(drift['observed'])}  {_tag(drift)}")
+    for alert in report["alerts"]:
+        print(f"! {alert['resource']} : {alert['reason']}  {_tag(alert)}")
+    pending = [c for c in report["code_changes"]
+               if not c["explained_by_drift"] and c["resource"] not in {a["resource"] for a in report["alerts"]}]
     if pending:
         print(f"Changements de code non appliqués : {', '.join(c['resource'] for c in pending)}")
     print(f"Rapport : {path}")
-    return 2 if report["drifts"] else 0
+    return 2 if (report["drifts"] or report["alerts"]) else 0
 
 
 def main(argv=None) -> int:
