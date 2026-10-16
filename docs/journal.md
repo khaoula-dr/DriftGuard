@@ -70,3 +70,10 @@ d'un document non autorisé pour drift-reader (US-5).
 - Décision : le tag `Project` n'est jamais corrigé automatiquement, car il intervient dans les conditions IAM de `drift-fixer` et de `drift-reader` (SendCommand). Conséquence cohérente : si `Project` est modifié, `drift-fixer` perd de toute façon le droit de taguer la ressource.
 - Les actions de suppression ou de remplacement proposées par le plan produisent des alertes, jamais une correction.
 - Observation : un `up.sh` a remplacé l'instance EC2 (1 ajoutée, 1 détruite), cause probable : la source de données AMI « dernière version » a changé. Un tel remplacement est exactement ce que la classe « Risque élevé » doit signaler.
+
+## Décision de périmètre (2026-10-12)
+
+- Reportées en « extension prévue » : US-8 et US-15 (détecteur Ansible), US-14 (HTTP 200). US-9 remplacée par `docs/demo.md`.
+- Raison : le temps ne couvre pas les 49 points avec la qualité attendue. Priorité à ce qui différencie le projet : séparation des droits IAM, attribution CloudTrail, correction bornée, tests négatifs.
+- Reste : 16 points (US-10, 11, 12, 13, 16, 17), voir `docs/scope.md` et ADR-005.
+- Communication : l'extension Ansible est annoncée comme « prévue », jamais comme livrée.
